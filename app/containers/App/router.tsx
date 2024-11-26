@@ -1,6 +1,6 @@
-import Login from '@components/Login/Loadable';
 import VerifyOtp from '@components/Login/VerifyOtp/Loadable';
 import LoginContainer, { AuthRedirectLoadable } from '@containers/Auth/Loadable';
+import Login from '@containers/Auth/Login/Loadable';
 import { Logout } from '@containers/Auth/Logout';
 import { Redirect } from '@containers/Auth/Redirect';
 import { createBrowserRouter } from 'react-router-dom';

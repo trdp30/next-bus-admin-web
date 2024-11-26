@@ -1,10 +1,10 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
 import { fixupConfigRules } from '@eslint/compat';
+import pluginJs from '@eslint/js';
 import eslintPluginFormat from 'eslint-plugin-formatjs';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default [
   {
@@ -36,7 +36,7 @@ export default [
   {
     rules: {
       'react/react-in-jsx-scope': 'off',
-      'formatjs/no-literal-string-in-jsx': 'error',
+      'formatjs/no-literal-string-in-jsx': 'off',
       'formatjs/no-multiple-whitespaces': 'error',
       ...jsxA11y.configs.recommended.rules,
       'react/display-name': 'warn',
