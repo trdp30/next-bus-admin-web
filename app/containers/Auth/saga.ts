@@ -1,62 +1,62 @@
-import { call, fork, takeLatest, put, select, debounce } from '@redux-saga/core/effects';
+import { call, debounce, fork, put, select, takeLatest } from '@redux-saga/core/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationResult, UserCredential } from 'firebase/auth';
 import { get } from 'lodash';
 
 import {
-  initialize,
-  initializeComplete,
-  verifyEmailOtp,
-  getPhoneFirebaseOtpSuccess,
-  verifyFirebaseOtp,
-  getEmailOtpSuccess,
-  getEmailOtp,
-  getPhoneFirebaseOtp,
   authenticate,
   authenticateFailed,
+  fetchCandidateDetails,
+  getEmailOtp,
+  getEmailOtpSuccess,
+  getPhoneFirebaseOtp,
+  getPhoneFirebaseOtpSuccess,
+  initialize,
+  initializeComplete,
+  initializeSocialLogin,
+  storeCandidateDetails,
+  storeCurrentUser,
   storeIdToken,
   storeQueryParams,
-  initializeSocialLogin,
-  storeCurrentUser,
   storeStoredSession,
-  fetchCandidateDetails,
-  storeCandidateDetails,
+  verifyEmailOtp,
+  verifyFirebaseOtp,
 } from '@containers/Auth/slice';
 
 import {
   authenticateFirebase,
   getAllParams,
+  getStoredQueryParams,
   getStoredSession,
+  initSocialLogin,
+  isTokenExpired,
+  parseToken,
   signInCredential,
   signInPhone,
-  initSocialLogin,
-  parseToken,
-  isTokenExpired,
-  getStoredQueryParams,
 } from './helpers';
 
 import {
-  EmailInput,
-  PhoneInput,
-  VerifyOtpInput,
-  FirebaseVerifyOtpPayload,
-  AuthState,
-  QueryParams,
-  SignUpResponsePayload,
-  GetCustomTokenPayload,
   AuthenticateWorker,
+  AuthState,
+  CandidateDetailsProps,
+  CurrentUserResponse,
+  EmailInput,
+  FirebaseVerifyOtpPayload,
+  GetCustomTokenPayload,
   GetStoredSession,
   InitializeSocialLoginPayload,
-  SocialLoginSuccessPayload,
   ParsedToken,
-  CurrentUserResponse,
-  CandidateDetailsProps,
+  PhoneInput,
+  QueryParams,
+  SignUpResponsePayload,
+  SocialLoginSuccessPayload,
+  VerifyOtpInput,
 } from './types';
 
 import { FIND_EXISTING_USER, GET_CURRENT_USER, GET_CUSTOM_TOKEN, OTP_REQUEST, SIGNUP, VERIFY_OTP } from './queries';
 
-import { selectAuth, selectIdToken, selectQueryParams } from './selectors';
-import { catchError } from '@utils/sentry';
+import { fetchCountryCodeApi } from '@utils/fetchCountryCode';
+import fetchData from '@utils/fetchData';
 import initializeFirebase from '@utils/firebase';
 import {
   AUTH_STORAGE_KEY,
@@ -66,9 +66,9 @@ import {
   PAYMENT_DETAILS,
   QUERY_PARAMS_STORAGE_KEY,
 } from '@utils/localStorageHelpers';
-import { fetchCountryCodeApi } from '@utils/fetchCountryCode';
 import postData from '@utils/postData';
-import fetchData from '@utils/fetchData';
+import { catchError } from '@utils/sentry';
+import { selectAuth, selectIdToken, selectQueryParams } from './selectors';
 
 import { SagaCallback } from '@store/types';
 

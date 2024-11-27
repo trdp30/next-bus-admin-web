@@ -7,6 +7,8 @@ import './index.css';
 import store from './store';
 // import * as Sentry from '@sentry/react';
 
+console.log('HASURA_HTTP: ', process.env.HASURA_HTTP);
+
 // Sentry.init({
 //   dsn: '',
 //   integrations: [Sentry.browserTracingIntegration(), Sentry.replayIntegration()],

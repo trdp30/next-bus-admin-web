@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: admin-next-bus
+    image: admin-next-bus
+    build:
+      context: .
+      # env_file:
+      #   - .env
+      args:
+        - BUILD_ENV=local
+        - ESLINT_USE_FLAT_CONFIG=true
+        - HASURA_HTTP=https://top-api.talview.org
+        - HASURA_WS=wss://top-api.talview.org
+        - FIREBASE_API_DOMAIN=next-bus-67f78.firebaseapp.com
+        - FIREBASE_API_KEY=AIzaSyB9UOLud9wkXZNgQSoKr36j03W4axSq6QI
+        - FIREBASE_PROJECT_ID=next-bus-67f78
+        - FIREBASE_STORAGE_BUCKET=next-bus-67f78.firebasestorage.app
+        - FIREBASE_MESSAGING_SENDER_ID=416876094817
+        - FIREBASE_APP_ID=1:416876094817:web:dbac8ab5a44ac0656c5120
+        - FIREBASE_MEASUREMENT_ID=G-7ZNCHFG6KX
+        - FONTAWESOME_NPM_AUTH_TOKEN=8127B676-AC0C-4FB6-AFD2-EF16FD755267
+    ports:
+      - 3000:80

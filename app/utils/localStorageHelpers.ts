@@ -1,7 +1,7 @@
 import { catchError } from '@utils/sentry';
 import { forEach } from 'lodash';
 
-export const appName = `cx-3.x-${process.env.BUILD_ENV}`;
+export const appName = `nba-${process.env.BUILD_ENV}`;
 
 export const AUTH_STORAGE_KEY = 'authentication';
 export const LANG_STORAGE_KEY = 'lang';

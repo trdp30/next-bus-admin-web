@@ -3,4 +3,6 @@ public
 build
 dist
 .gitignore
-internals
+nginx
+webpack.common.ts
+webpack.development.ts

@@ -44,20 +44,6 @@ module.exports = {
               limit: 10 * 1024, // Inline images smaller than 10KB as base64 URIs
             },
           },
-          {
-            loader: 'image-webpack-loader', // Use image-webpack-loader to optimize images
-            options: {
-              mozjpeg: {
-                enabled: false, // Disable mozjpeg optimization
-              },
-              gifsicle: {
-                interlaced: false, // Disable interlacing for GIFs
-              },
-              optipng: {
-                optimizationLevel: 7, // Set PNG optimization level
-              },
-            },
-          },
         ],
       },
     ],

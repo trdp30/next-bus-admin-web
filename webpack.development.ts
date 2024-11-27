@@ -10,7 +10,7 @@ module.exports = webpackMerge.merge(common, {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
-    port: 2100,
+    port: 3000,
     historyApiFallback: true,
   },
   output: {

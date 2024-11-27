@@ -51,6 +51,7 @@ export default [
       ],
       'jsx-a11y/tabindex-no-positive': 'off',
       '@typescript-eslint/no-var-requires': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 ];
