@@ -2,7 +2,6 @@ import React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
 import classNames from 'classnames';
 
-/* eslint-disable react/prop-types */
 const ProgressBar = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> & {

@@ -8,7 +8,6 @@ interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimit
 }
 
 const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, SwitchProps>((props, ref) => {
-  // eslint-disable-next-line react/prop-types
   const { onClick, checked } = props;
   return (
     <SwitchPrimitives.Root

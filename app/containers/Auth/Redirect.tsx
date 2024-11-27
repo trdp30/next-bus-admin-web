@@ -18,8 +18,5 @@ export const Redirect = () => {
 
   console.log('Redirecting page content: ', queryParams);
 
-  return (
-    // eslint-disable-next-line formatjs/no-literal-string-in-jsx
-    <div>Redirecting...</div>
-  );
+  return <div>Redirecting...</div>;
 };

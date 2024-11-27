@@ -3,7 +3,6 @@ import { OTPInput, OTPInputContext } from 'input-otp';
 import classNames from 'classnames';
 import { Dot } from 'lucide-react';
 
-/* eslint-disable react/prop-types */
 const InputOTP = React.forwardRef<React.ElementRef<typeof OTPInput>, React.ComponentPropsWithoutRef<typeof OTPInput>>(
   (props, ref) => (
     <OTPInput
