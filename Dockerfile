@@ -30,4 +30,6 @@ WORKDIR /var/www
 COPY --from=builder /app/dist /var/www
 COPY nginx/nginx.${BUILD_ENV:-dev}.conf /etc/nginx/conf.d/default.conf
 
+EXPOSE 3000
+
 CMD ["nginx", "-g", "daemon off;"]
