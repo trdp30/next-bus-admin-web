@@ -3,8 +3,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # ENV PATH=/app/node_modules/.bin:$PATH
-COPY package.json ./
-COPY yarn.lock ./
+COPY package.json yarn.lock ./
 COPY . .
 
 ENV HASURA_HTTP=https://top-api.talview.org
@@ -21,13 +20,28 @@ RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --s
 
 RUN yarn run build
 
-FROM nginx:1.27-alpine
+CMD ["yarn", "serve", "--port", "3000"]
 
-ARG BUILD_ENV
+# Use a lightweight HTTP server
+FROM node:22-alpine
+WORKDIR /app
+RUN yarn global add serve
+COPY --from=builder /app/dist ./dist
 
-WORKDIR /var/www
+ENV NODE_ENV=production
 
-COPY --from=builder /app/dist /var/www
-COPY nginx/nginx.${BUILD_ENV:-dev}.conf /etc/nginx/conf.d/default.conf
+CMD ["serve", "-s", "dist", "-l", "3000"]
+
+
+# FROM nginx:1.27-alpine
+
+# ARG BUILD_ENV
+
+# WORKDIR /var/www
+
+# COPY --from=builder /app/dist /var/www
+# COPY nginx/nginx.${BUILD_ENV:-dev}.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
