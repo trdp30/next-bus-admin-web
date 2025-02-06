@@ -2,7 +2,7 @@ import { appName } from '@utils/localStorageHelpers';
 import { catchError } from '@utils/sentry';
 import { Analytics, getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import { Auth, getAuth } from 'firebase/auth';
+import { Auth, getAuth, signOut } from 'firebase/auth';
 
 interface FirebaseInstance {
   firebaseApp: object;
@@ -39,3 +39,26 @@ export const initializeFirebase = (): FirebaseInstance | undefined => {
 };
 
 export default initializeFirebase;
+
+export const getFirebaseIdToken = async (): Promise<string> => {
+  const auth = firebaseInstance?.fireBaseAuth;
+  await auth.authStateReady();
+  const currentUser = auth?.currentUser;
+  let idToken = '';
+  if (typeof currentUser?.getIdToken === 'function') {
+    idToken = await currentUser?.getIdToken();
+  }
+  return idToken;
+};
+
+export const firebaseLogout = async () => {
+  const auth = firebaseInstance?.fireBaseAuth;
+  await signOut(auth);
+};
+
+export const getFirebaseUser = async () => {
+  const auth = firebaseInstance?.fireBaseAuth;
+  await auth.authStateReady();
+  const currentUser = auth?.currentUser;
+  return currentUser && currentUser?.toJSON();
+};

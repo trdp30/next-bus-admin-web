@@ -1,8 +1,6 @@
-import VerifyOtp from '@components/Login/VerifyOtp/Loadable';
 import LoginContainer, { AuthRedirectLoadable } from '@containers/Auth/Loadable';
 import Login from '@containers/Auth/Login/Loadable';
 import { Logout } from '@containers/Auth/Logout';
-import { Redirect } from '@containers/Auth/Redirect';
 import { createBrowserRouter } from 'react-router-dom';
 import RootErrorPage from './RootErrorPage';
 import RootLayout from './RootLayout';
@@ -20,22 +18,18 @@ const router = createBrowserRouter([
             path: 'login',
             lazy: Login,
           },
-          {
-            path: 'verify',
-            lazy: VerifyOtp,
-          },
         ],
       },
       {
         lazy: AuthRedirectLoadable,
         children: [
           {
-            path: 'redirect',
-            element: <Redirect />,
-          },
-          {
             path: 'logout',
             element: <Logout />,
+          },
+          {
+            path: '/home',
+            element: <div>Hello</div>,
           },
         ],
       },

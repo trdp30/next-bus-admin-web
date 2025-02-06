@@ -1,22 +1,11 @@
 import AuthContext from '@contexts/AuthContext';
 import { faSpinner } from '@fortawesome/pro-light-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useAppDispatch } from '@store/hooks';
-import React, { useContext, useLayoutEffect } from 'react';
+import React, { useContext } from 'react';
 import { Outlet } from 'react-router-dom';
-import { getAllParams } from './helpers';
-import { storeQueryParams } from './slice';
 
 export const LoginContainer: React.FC = () => {
-  const { isAuthenticating, isInitialized, queryParams } = useContext(AuthContext);
-  const dispatch = useAppDispatch();
-
-  useLayoutEffect(() => {
-    if (isInitialized) {
-      const params = getAllParams();
-      dispatch(storeQueryParams({ ...queryParams, ...params }));
-    }
-  }, [isInitialized]);
+  const { isAuthenticating, isInitialized } = useContext(AuthContext);
 
   return (
     <div className="flex justify-center items-center h-full w-full overflow-hidden">

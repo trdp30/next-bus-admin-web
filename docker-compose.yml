@@ -11,8 +11,6 @@ services:
       args:
         - BUILD_ENV=local
         - ESLINT_USE_FLAT_CONFIG=true
-        - HASURA_HTTP=https://top-api.talview.org
-        - HASURA_WS=wss://top-api.talview.org
         - FIREBASE_API_DOMAIN=next-bus-67f78.firebaseapp.com
         - FIREBASE_API_KEY=AIzaSyB9UOLud9wkXZNgQSoKr36j03W4axSq6QI
         - FIREBASE_PROJECT_ID=next-bus-67f78

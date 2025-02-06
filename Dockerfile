@@ -6,8 +6,6 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 COPY . .
 
-ENV HASURA_HTTP=https://top-api.talview.org
-ENV HASURA_WS=wss://top-api.talview.org
 ENV FIREBASE_API_DOMAIN=next-bus-67f78.firebaseapp.com
 ENV FIREBASE_API_KEY=AIzaSyB9UOLud9wkXZNgQSoKr36j03W4axSq6QI
 ENV FIREBASE_PROJECT_ID=next-bus-67f78

@@ -1,6 +1,6 @@
 import { triggerToast } from '@components/base/Notification';
 // import * as Sentry from '@sentry/react';
-import { User } from '@containers/Auth/types';
+// import { User } from '@containers/Auth/types';
 
 interface CatchErrorArgs {
   title: string;
@@ -41,9 +41,9 @@ export const catchError = (props: CatchErrorArgs) => {
   }
 };
 
-export const sentrySetUser = (_user: User) => {
-  // Sentry.setUser({
-  //   id: (user?.user_id && Number(user?.user_id)) as number,
-  //   tenant_id: user?.tenant_id && Number(user?.tenant_id),
-  // });
-};
+// export const sentrySetUser = (_user: User) => {
+// Sentry.setUser({
+//   id: (user?.user_id && Number(user?.user_id)) as number,
+//   tenant_id: user?.tenant_id && Number(user?.tenant_id),
+// });
+// };

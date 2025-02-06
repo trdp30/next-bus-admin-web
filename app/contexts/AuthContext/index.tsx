@@ -4,30 +4,23 @@
  *
  */
 
-import type { Email, Phone } from '@components/Login/types';
-import {
-  selectAuth,
-  selectCandidateDetails,
-  selectCurrentUser,
-  selectQueryParams,
-  selectUser,
-} from '@containers/Auth/selectors';
-import {
-  getEmailOtp,
-  getPhoneFirebaseOtp,
-  initialize,
-  initializeSocialLogin,
-  unAuthenticate,
-  verifyEmailOtp,
-  verifyFirebaseOtp,
-} from '@containers/Auth/slice';
-import type { AuthUserMe, CandidateDetailsProps, QueryParams, User } from '@containers/Auth/types';
-import { SocialLoginProviderName } from '@containers/Auth/types';
+import { selectAuth, selectAuthInitialized } from '@containers/Auth/selectors';
+import { initialize, triggerAuthenticate, unAuthenticate } from '@containers/Auth/slice';
+import { Email, FbUser, Password } from '@containers/Auth/types';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import type { SagaCallback } from '@store/types';
-import { sentrySetUser } from '@utils/sentry';
+import { firebaseInstance } from '@utils/firebase';
+import { catchError } from '@utils/sentry';
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  Unsubscribe,
+} from 'firebase/auth';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router';
+import { getAllParams } from '@containers/Auth/helpers';
 
 export interface Tokens {
   accessToken: string | null;
@@ -40,40 +33,24 @@ export type AuthContextType = {
   isAuthenticated: boolean;
   isAuthenticating: boolean;
   isInitialized: boolean;
-  triggerEmailOtp: (_userName: Email, _callback: SagaCallback) => void;
-  triggerPhoneFirebaseOtp: (_phoneNumber: Phone, _callback: SagaCallback) => void;
-  triggerVerifyEmailOtp: (_code: number, _callback?: SagaCallback) => void;
-  triggerFirebaseVerifyOtp: (_code: string, _callback?: SagaCallback) => void;
+  triggerGoogleLogin: () => void;
+  triggerEmailPasswordLogin: (args: { email: Email; password: Password; callback?: SagaCallback }) => void;
   triggerUnAuthenticate: () => void;
-  phone?: Phone;
-  username?: Email;
-  verificationCodeRequested: boolean;
-  user?: User;
-  queryParams?: QueryParams;
-  socialLoginProviders?: SocialLoginProviderName;
-  initiateSocialLogin: (_name: SocialLoginProviderName, _callback: SagaCallback) => void;
-  currentUser?: AuthUserMe | undefined;
+  user: FbUser | null;
   tokens?: Tokens;
-  candidateDetails?: CandidateDetailsProps | undefined;
   redirectPostAuthentication?: () => void;
 };
 
 export const authContextInitialState = {
   isAuthenticated: false,
   isAuthenticating: true,
-  triggerEmailOtp: (_userName: Email, _callback: SagaCallback) => {},
-  triggerPhoneFirebaseOtp: (_phoneNumber: Phone, _callback: SagaCallback) => {},
-  initiateSocialLogin: (_name: SocialLoginProviderName) => {},
-  triggerVerifyEmailOtp: (_code: number, _callback?: SagaCallback) => {},
-  triggerFirebaseVerifyOtp: (_code: string, _callback?: SagaCallback) => {},
-  triggerUnAuthenticate: () => {},
-  phone: '' as Phone,
-  username: '' as Email,
-  verificationCodeRequested: false,
   isInitialized: false,
-  // currentUser: undefined,
-  // candidateDetails: undefined,
-  tokens: { accessToken: '' },
+  triggerGoogleLogin: () => {},
+  triggerEmailPasswordLogin: () => {},
+  triggerUnAuthenticate: () => {},
+  user: null,
+  tokens: undefined,
+  redirectPostAuthentication: () => {},
 };
 
 const AuthContext = React.createContext<AuthContextType>(authContextInitialState);
@@ -85,69 +62,17 @@ interface AuthProviderProps {
 function AuthProvider(props: AuthProviderProps) {
   const dispatch = useAppDispatch();
   const state = useAppSelector(selectAuth);
-  const user = useAppSelector(selectUser);
-  const queryParams = useAppSelector(selectQueryParams);
-  const currentUser = useAppSelector(selectCurrentUser);
-  const candidateDetails = useAppSelector(selectCandidateDetails);
+  const isAuthInitialized = useAppSelector(selectAuthInitialized);
+  const [search] = useSearchParams();
   const navigate = useNavigate();
 
-  const tokens = useMemo<Tokens>(() => {
-    const { accessToken, customToken, idToken, hash_token } = state;
-    return { accessToken, customToken, idToken, hash_token };
-  }, [state]);
-
-  const triggerEmailOtp = useCallback(
-    (username: Email, callback: SagaCallback) => {
-      dispatch(getEmailOtp({ username, callback }));
-    },
-    [dispatch]
-  );
-
-  const triggerPhoneFirebaseOtp = useCallback(
-    (phone: Phone, callback: SagaCallback) => {
-      dispatch(getPhoneFirebaseOtp({ phone, callback }));
-    },
-    [dispatch]
-  );
-
-  const triggerVerifyEmailOtp = useCallback(
-    (code: number, callback?: SagaCallback) => {
-      dispatch(
-        verifyEmailOtp({
-          username: user?.phone || user?.username,
-          code,
-          callback,
-        })
-      );
-    },
-    [user, dispatch]
-  );
-
-  const triggerFirebaseVerifyOtp = useCallback(
-    (code: string, callback?: SagaCallback) => {
-      dispatch(
-        verifyFirebaseOtp({
-          code,
-          callback,
-        })
-      );
-    },
-    [dispatch]
-  );
-
-  const initiateSocialLogin = (name: SocialLoginProviderName, callback: SagaCallback) => {
-    dispatch(
-      initializeSocialLogin({
-        socialLoginProviderName: name,
-        callback: callback,
-      })
-    );
-  };
-
   const redirectPostAuthentication = () => {
+    const queryParams = getAllParams(search);
     if (queryParams?.from) {
       const path = `${queryParams?.from}`;
       navigate(path, { replace: true });
+    } else {
+      navigate('/home', { replace: true });
     }
   };
 
@@ -155,54 +80,71 @@ function AuthProvider(props: AuthProviderProps) {
     dispatch(unAuthenticate());
   };
 
-  const value = useMemo(
+  const triggerGoogleLogin = useCallback(async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(firebaseInstance.fireBaseAuth, provider);
+    } catch (error) {
+      console.error('Error logging in with Google', error);
+      catchError({ title: 'Google login', error: error as Error });
+    }
+  }, []);
+
+  const triggerEmailPasswordLogin = useCallback(
+    async ({ email, password, callback }: { email: Email; password: Password; callback?: SagaCallback }) => {
+      try {
+        await signInWithEmailAndPassword(firebaseInstance.fireBaseAuth, email, password);
+        if (callback?.onSuccess) {
+          callback.onSuccess();
+        }
+      } catch (error) {
+        console.error('Error logging in with email and password', error);
+        if (callback?.onError) {
+          callback.onError();
+        }
+        catchError({ title: 'Email password login', error: error as Error });
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    let unsubscribe: Unsubscribe;
+    if (isAuthInitialized) {
+      unsubscribe = onAuthStateChanged(firebaseInstance.fireBaseAuth, async (userData) => {
+        if (userData && !state.authenticated) {
+          dispatch(triggerAuthenticate());
+        }
+      });
+    }
+    return () => unsubscribe && unsubscribe();
+  }, [dispatch, isAuthInitialized]);
+
+  useEffect(() => {
+    if (state.authenticated) {
+      redirectPostAuthentication();
+    }
+  }, [state.authenticated]);
+
+  const value = useMemo<AuthContextType>(
     () => ({
-      user,
-      queryParams,
+      user: state?.user,
       isAuthenticated: state.authenticated,
       isAuthenticating: state.authenticating,
       isInitialized: state.initialized,
-      triggerEmailOtp,
-      triggerPhoneFirebaseOtp,
-      initiateSocialLogin,
-      triggerVerifyEmailOtp,
-      triggerFirebaseVerifyOtp,
-      username: user?.username,
-      phone: user?.phone,
-      verificationCodeRequested: state?.verificationCodeRequested,
-      currentUser: currentUser || undefined,
-      tokens,
-      candidateDetails: candidateDetails || undefined,
       redirectPostAuthentication,
       triggerUnAuthenticate,
+      triggerGoogleLogin,
+      triggerEmailPasswordLogin,
     }),
-    [
-      user,
-      queryParams,
-      state.authenticated,
-      state.authenticating,
-      state.initialized,
-      state?.verificationCodeRequested,
-      triggerEmailOtp,
-      triggerPhoneFirebaseOtp,
-      triggerVerifyEmailOtp,
-      triggerFirebaseVerifyOtp,
-      currentUser,
-      tokens,
-      candidateDetails,
-      triggerUnAuthenticate,
-    ]
+    [state, triggerUnAuthenticate]
   );
 
   useEffect(() => {
     dispatch(initialize());
   }, []);
 
-  useEffect(() => {
-    sentrySetUser(user);
-  }, [value.isAuthenticated, value.isAuthenticating]);
-
-  return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{isAuthInitialized ? props.children : <></>}</AuthContext.Provider>;
 }
 
 export const AuthConsumer = AuthContext.Consumer;
