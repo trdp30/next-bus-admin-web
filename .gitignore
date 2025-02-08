@@ -141,3 +141,4 @@ bin/
 storybook-static
 
 .vscode
+secrets
