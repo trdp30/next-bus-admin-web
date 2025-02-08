@@ -1,47 +1,39 @@
+# Use the base image
 FROM node:22-alpine AS builder
 
-ARG FIREBASE_API_DOMAIN
-ARG FIREBASE_API_KEY
-ARG FIREBASE_PROJECT_ID
-ARG FIREBASE_STORAGE_BUCKET
-ARG FIREBASE_MESSAGING_SENDER_ID
-ARG FIREBASE_APP_ID
-ARG FIREBASE_MEASUREMENT_ID
-ARG GOOGLE_MAPS_API_KEY
-ARG REST_API_ROOT
-ARG REST_API_VERSION
-ARG GOOGLE_PLACE_API_ROOT
+# Install required packages and set the working directory
+RUN apk add --no-cache autoconf automake libtool zlib-dev git && \
+    mkdir -p /app \
 
-ENV FIREBASE_API_DOMAIN=${FIREBASE_API_DOMAIN}
-ENV FIREBASE_API_KEY=${FIREBASE_API_KEY}
-ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-ENV FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
-ENV FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
-ENV FIREBASE_APP_ID=${FIREBASE_APP_ID}
-ENV FIREBASE_MEASUREMENT_ID=${FIREBASE_MEASUREMENT_ID}
-ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-ENV REST_API_ROOT=${REST_API_ROOT}
-ENV REST_API_VERSION=${REST_API_VERSION}
-ENV GOOGLE_PLACE_API_ROOT=${GOOGLE_PLACE_API_ROOT}
-
+# Set the working directory
 WORKDIR /app
 
-COPY package.json ./
-COPY yarn.lock ./
-COPY . .
+# Copy package.json and yarn.lock
+COPY package.json yarn.lock ./
 
+# Install dependencies
 RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --silent --inline-builds
 
+# Copy the rest of the application code
+COPY . .
+
+# Build the application
 RUN yarn run build
 
+# Use nginx as the base image for the final stage
 FROM nginx:1.27-alpine
 
-ARG BUILD_ENV
-
+# Set the working directory
 WORKDIR /var/www
 
+# Copy built files from the builder stage
 COPY --from=builder /app/dist /var/www
+
+# Define build arguments
+ARG BUILD_ENV
+
+# Copy nginx configuration file
 COPY nginx/nginx.${BUILD_ENV:-dev}.conf /etc/nginx/conf.d/default.conf
 
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
