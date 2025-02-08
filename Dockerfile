@@ -1,9 +1,13 @@
 # Use the base image
 FROM node:22-alpine AS builder
 
-# Install required packages and set the working directory
-RUN apk add --no-cache autoconf automake libtool zlib-dev git && \
-    mkdir -p /app \
+# Install required packages
+RUN apk add --no-cache \
+    autoconf \
+    automake \
+    libtool \
+    zlib-dev \
+    git
 
 # Set the working directory
 WORKDIR /app
