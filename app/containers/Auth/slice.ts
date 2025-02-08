@@ -1,6 +1,7 @@
 import { AuthenticatePayload, AuthState } from '@containers/Auth/types';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import { CurrentUser } from '@/types';
 
 export const initialState: AuthState = {
   initializing: true,
@@ -9,6 +10,7 @@ export const initialState: AuthState = {
   authenticating: true,
   idToken: null,
   user: undefined,
+  currentUser: undefined,
 };
 
 export const authSlice = createSlice({
@@ -48,6 +50,10 @@ export const authSlice = createSlice({
     },
 
     initializeGoogleLogin: (_state) => {},
+    storeCurrentUser: (state, action: PayloadAction<CurrentUser>) => {
+      state.currentUser = action.payload;
+    },
+    deleteAccount: (_state) => {},
   },
 });
 
@@ -59,6 +65,7 @@ export const {
   authenticateFailed,
   initializeGoogleLogin,
   triggerAuthenticate,
+  storeCurrentUser,
 } = authSlice.actions;
 
 export default authSlice.reducer;

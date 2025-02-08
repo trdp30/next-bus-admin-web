@@ -4,6 +4,7 @@
  *
  */
 
+import { getAllParams } from '@containers/Auth/helpers';
 import { selectAuth, selectAuthInitialized } from '@containers/Auth/selectors';
 import { initialize, triggerAuthenticate, unAuthenticate } from '@containers/Auth/slice';
 import { Email, FbUser, Password } from '@containers/Auth/types';
@@ -20,7 +21,7 @@ import {
 } from 'firebase/auth';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { getAllParams } from '@containers/Auth/helpers';
+import { CurrentUser } from '@/types';
 
 export interface Tokens {
   accessToken: string | null;
@@ -36,9 +37,10 @@ export type AuthContextType = {
   triggerGoogleLogin: () => void;
   triggerEmailPasswordLogin: (args: { email: Email; password: Password; callback?: SagaCallback }) => void;
   triggerUnAuthenticate: () => void;
-  user: FbUser | null;
+  user?: FbUser;
   tokens?: Tokens;
   redirectPostAuthentication?: () => void;
+  currentUser?: CurrentUser;
 };
 
 export const authContextInitialState = {
@@ -48,7 +50,6 @@ export const authContextInitialState = {
   triggerGoogleLogin: () => {},
   triggerEmailPasswordLogin: () => {},
   triggerUnAuthenticate: () => {},
-  user: null,
   tokens: undefined,
   redirectPostAuthentication: () => {},
 };
@@ -129,6 +130,7 @@ function AuthProvider(props: AuthProviderProps) {
   const value = useMemo<AuthContextType>(
     () => ({
       user: state?.user,
+      currentUser: state?.currentUser,
       isAuthenticated: state.authenticated,
       isAuthenticating: state.authenticating,
       isInitialized: state.initialized,

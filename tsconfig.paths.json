@@ -8,7 +8,8 @@
       "@hooks/*": ["app/hooks/*"],
       "@contexts/*": ["app/contexts/*"],
       "@assets/*": ["app/assets/*"],
-      "@store/*": ["app/store/*"]
+      "@store/*": ["app/store/*"],
+      "@/*": ["app/*"]
     }
   }
 }

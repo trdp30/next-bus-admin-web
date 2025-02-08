@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import rootSaga from '@store/saga';
 import createSagaMiddleware from 'redux-saga';
 import rootReducer from './reducers';
+import { userApi } from '@store/services/userApi';
 // import * as Sentry from '@sentry/react';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -15,7 +16,7 @@ export function configureAppStore(preloadedState: object) {
         serializableCheck: {
           ignoredActionPaths: [],
         },
-      }).concat(sagaMiddleware),
+      }).concat(sagaMiddleware, userApi.middleware),
 
     preloadedState,
     // enhancers: (getDefaultEnhancers) => {

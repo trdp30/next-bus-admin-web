@@ -4,12 +4,13 @@ export interface AuthState {
   authenticated: boolean;
   authenticating: boolean;
   idToken: string | null;
-  user?: User;
+  user?: FbUser;
+  currentUser?: CurrentUser;
 }
 
 export interface AuthenticatePayload {
   idToken: string;
-  user?: User;
+  user?: FbUser;
 }
 
 export type Email = string;

@@ -2,7 +2,7 @@ import { triggerToast } from '@components/base/Notification';
 // import * as Sentry from '@sentry/react';
 // import { User } from '@containers/Auth/types';
 
-interface CatchErrorArgs {
+export interface CatchErrorArgs {
   title: string;
   error: Error;
   extraScope?: { key: string; value: string };
