@@ -22,15 +22,6 @@ jobs:
           username: trdp
           password: ${{ secrets.DOCKER_PAT }}
 
-      - name: Create secrets directory
-        run: mkdir -p ./secrets
-
-      - name: Add Firebase API key secret
-        run: echo "${{ secrets.FIREBASE_API_KEY }}" > ./secrets/firebase_api_key.txt
-
-      - name: Add Google Maps API key secret
-        run: echo "${{ secrets.GOOGLE_MAPS_API_KEY }}" > ./secrets/google_maps_api_key.txt
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:

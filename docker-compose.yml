@@ -19,7 +19,7 @@ services:
         REST_API_VERSION: ${REST_API_VERSION}
         GOOGLE_PLACE_API_ROOT: ${GOOGLE_PLACE_API_ROOT}
     ports:
-      - "3000:80"
+      - '3000:80'
     environment:
       - NODE_ENV=development
     volumes:
