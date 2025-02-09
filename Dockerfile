@@ -15,6 +15,11 @@ WORKDIR /app
 # Copy package.json and yarn.lock
 COPY package.json yarn.lock ./
 
+# Set npm configuration for FontAwesome
+RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/ \
+    && npm config set "//npm.fontawesome.com/:_authToken" 8127B676-AC0C-4FB6-AFD2-EF16FD755267
+
+
 # Install dependencies
 RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --silent --inline-builds
 
