@@ -1,7 +1,7 @@
 services:
   app:
     container_name: admin-next-bus
-    # image: trdp/next-bus-admin:latest
+    image: trdp/next-bus-admin:latest
     ports:
       - '3000:80'
     environment:

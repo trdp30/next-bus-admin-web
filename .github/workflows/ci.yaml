@@ -31,6 +31,8 @@ jobs:
           tags: trdp/next-bus-admin:latest
           build-args: |
             BUILD_ENV: dev
+            FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+            GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -45,6 +47,8 @@ jobs:
           tags: trdp/next-bus-admin:latest
           build-args: |
             BUILD_ENV: dev
+            FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+            GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Clean up Docker images
         run: docker image prune -f
