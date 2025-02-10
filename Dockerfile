@@ -12,25 +12,6 @@ RUN apk add --no-cache \
 # Set the working directory
 WORKDIR /app
 
-# Define build arguments
-ARG FIREBASE_API_KEY
-ARG GOOGLE_MAPS_API_KEY
-
-# Set environment variables
-ENV HASURA_HTTP=https://api.nextbus.co.in
-ENV HASURA_WS=wss://api.nextbus.co.in
-ENV FIREBASE_API_DOMAIN=next-bus-67f78.firebaseapp.com
-ENV FIREBASE_API_KEY=${FIREBASE_API_KEY}
-ENV FIREBASE_PROJECT_ID=next-bus-67f78
-ENV FIREBASE_STORAGE_BUCKET=next-bus-67f78.firebasestorage.app
-ENV FIREBASE_MESSAGING_SENDER_ID=416876094817
-ENV FIREBASE_APP_ID=1:416876094817:web:dbac8ab5a44ac0656c5120
-ENV FIREBASE_MEASUREMENT_ID=G-7ZNCHFG6KX
-ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
-ENV REST_API_ROOT=https://api.nextbus.co.in
-ENV REST_API_VERSION=v1
-ENV GOOGLE_PLACE_API_ROOT=https://places.googleapis.com/v1
-
 # Copy package.json and yarn.lock
 COPY package.json yarn.lock ./
 

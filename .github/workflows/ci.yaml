@@ -22,6 +22,22 @@ jobs:
           username: trdp
           password: ${{ secrets.DOCKER_PAT }}
 
+      - name: Create .env file
+        run: |
+          echo "HASURA_HTTP=https://api.nextbus.co.in" >> .env
+          echo "HASURA_WS=wss://api.nextbus.co.in" >> .env
+          echo "FIREBASE_API_DOMAIN=next-bus-67f78.firebaseapp.com" >> .env
+          echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+          echo "FIREBASE_PROJECT_ID=next-bus-67f78" >> .env
+          echo "FIREBASE_STORAGE_BUCKET=next-bus-67f78.firebasestorage.app" >> .env
+          echo "FIREBASE_MESSAGING_SENDER_ID=416876094817" >> .env
+          echo "FIREBASE_APP_ID=1:416876094817:web:dbac8ab5a44ac0656c5120" >> .env
+          echo "FIREBASE_MEASUREMENT_ID=G-7ZNCHFG6KX" >> .env
+          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
+          echo "REST_API_ROOT=https://api.nextbus.co.in" >> .env
+          echo "REST_API_VERSION=v1" >> .env
+          echo "GOOGLE_PLACE_API_ROOT=https://places.googleapis.com/v1" >> .env
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -31,24 +47,22 @@ jobs:
           tags: trdp/next-bus-admin:latest
           build-args: |
             BUILD_ENV: dev
-            FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-            GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v2
 
-      - name: Build and push multi-platform image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: trdp/next-bus-admin:latest
-          build-args: |
-            BUILD_ENV: dev
-            FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-            GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      # - name: Build and push multi-platform image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     push: true
+      #     tags: trdp/next-bus-admin:latest
+      #     build-args: |
+      #       BUILD_ENV: dev
+      #       FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+      #       GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Clean up Docker images
         run: docker image prune -f
