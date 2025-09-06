@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { initializeFirebase } from './utils/firebase/firebase';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 const AppContent: React.FC = () => {

@@ -1,12 +1,9 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useLogin } from './hooks';
+import type { LoginPageProps } from './types';
 
-const Login: React.FC = () => {
-  const { triggerGoogleLogin, isAuthenticating, error } = useAuth();
-
-  const handleGoogleLogin = async () => {
-    await triggerGoogleLogin();
-  };
+const Login: React.FC<LoginPageProps> = () => {
+  const { handleGoogleLogin, isAuthenticating, error } = useLogin();
 
   return (
     <div className="h-full flex items-center justify-center bg-gradient-to-br from-primary-600 to-secondary-600 p-5">
