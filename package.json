@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.0",
     "@tailwindcss/vite": "^4.1.13",
     "firebase": "^12.2.1",
+    "graphql": "^16.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

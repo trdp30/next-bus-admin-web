@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGraphQLQuery } from '../../hooks/useGraphQL';
+import { VEHICLES_QUERY, CURRENT_TRACKING_SESSION_QUERY } from '../../graphql';
 import type { DashboardStats, UserProfile } from './types';
 import { getInitialStats, getDashboardCards } from './helper';
 
@@ -8,9 +10,19 @@ import { getInitialStats, getDashboardCards } from './helper';
  */
 
 export const useDashboard = () => {
-  const { user, triggerUnAuthenticate } = useAuth();
+  const { user, triggerUnAuthenticate, isAuthenticated } = useAuth();
   const [stats, setStats] = useState<DashboardStats>(getInitialStats());
-  const [isLoading, setIsLoading] = useState(true);
+
+  // GraphQL queries
+  const { data: vehiclesData, loading: vehiclesLoading, error: vehiclesError } = useGraphQLQuery(
+    VEHICLES_QUERY,
+    { skip: !isAuthenticated }
+  );
+
+  const { data: trackingData, loading: trackingLoading, error: trackingError } = useGraphQLQuery(
+    CURRENT_TRACKING_SESSION_QUERY,
+    { skip: !isAuthenticated }
+  );
 
   const handleLogout = useCallback(async () => {
     try {
@@ -20,36 +32,34 @@ export const useDashboard = () => {
     }
   }, [triggerUnAuthenticate]);
 
-  const loadDashboardData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Simulate API call - replace with actual data fetching
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock data - replace with real API calls
-      setStats({
-        totalVehicles: 12,
-        activeJourneys: 3,
-        totalDistance: 1250,
-        alerts: 2,
-      });
-    } catch (error) {
-      console.error('Failed to load dashboard data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
+  // Calculate stats from GraphQL data
   useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+    if (vehiclesData?.vehicles && trackingData) {
+      const totalVehicles = vehiclesData.vehicles.length;
+      const activeJourneys = trackingData.currentTrackingSession ? 1 : 0;
+
+      setStats({
+        totalVehicles,
+        activeJourneys,
+        totalDistance: 0, // This would need to be calculated from tracking data
+        alerts: 0, // This would need to be calculated from various sources
+      });
+    }
+  }, [vehiclesData, trackingData]);
+
+  const isLoading = vehiclesLoading || trackingLoading;
 
   return {
     user: user as UserProfile | null,
     stats,
     isLoading,
     handleLogout,
-    loadDashboardData,
+    // GraphQL data
+    vehiclesData,
+    trackingData,
+    // Errors
+    vehiclesError,
+    trackingError,
   };
 };
 

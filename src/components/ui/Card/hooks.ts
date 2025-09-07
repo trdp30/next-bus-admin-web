@@ -5,7 +5,7 @@ import type { CardProps } from './types';
  * Custom hooks for the Card component
  */
 
-export const useCard = (props: CardProps) => {
+export const useCard = (props: Omit<CardProps, 'children'>) => {
   const { hover } = props;
 
   const handleMouseEnter = useCallback(() => {

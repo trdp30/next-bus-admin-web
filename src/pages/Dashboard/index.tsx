@@ -1,10 +1,9 @@
 import React from 'react';
 import { useDashboard, useDashboardCards } from './hooks';
-import { formatUserDisplayName, formatUserEmail } from './helper';
 import type { DashboardPageProps } from './types';
 
 const Dashboard: React.FC<DashboardPageProps> = () => {
-  const { user, stats, isLoading, handleLogout } = useDashboard();
+  const { isLoading } = useDashboard();
   const { cards, handleCardClick } = useDashboardCards();
 
   if (isLoading) {
@@ -20,37 +19,6 @@ const Dashboard: React.FC<DashboardPageProps> = () => {
 
   return (
     <div className="h-full bg-gray-50">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Jatayat Dashboard</h1>
-            <div className="flex items-center space-x-4">
-              {user?.photoURL && (
-                <img
-                  src={user.photoURL}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200 object-cover"
-                />
-              )}
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">
-                  {formatUserDisplayName(user?.displayName || '')}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {formatUserEmail(user?.email || '')}
-                </div>
-              </div>
-              <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">

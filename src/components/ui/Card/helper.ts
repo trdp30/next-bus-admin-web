@@ -4,7 +4,7 @@ import type { CardProps } from './types';
  * Helper functions for the Card component
  */
 
-export const getCardClasses = (props: CardProps): string => {
+export const getCardClasses = (props: Omit<CardProps, 'children'>): string => {
   const { hover, padding, shadow, border, rounded, className } = props;
 
   const baseClasses = 'bg-white';

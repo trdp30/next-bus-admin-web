@@ -14,6 +14,9 @@ import {
   type User,
 } from 'firebase/auth';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useGraphQLQuery } from '../../hooks/useGraphQL';
+import { ME_QUERY } from '../../graphql';
+import type { CombinedUser } from '../../types/graphql';
 
 export interface UserData {
   uid: string;
@@ -26,9 +29,12 @@ export interface UserData {
 export type AuthContextType = {
   isAuthenticated: boolean;
   isAuthenticating: boolean;
-  user: UserData | null;
+  isLoadingUser: boolean;
+  user: CombinedUser | UserData | null;
+  firebaseUser: UserData | null;
   triggerGoogleLogin: () => Promise<void>;
   triggerUnAuthenticate: () => Promise<void>;
+  refreshFirebaseToken: () => Promise<string | null>;
   error: string | null;
 };
 
@@ -39,9 +45,18 @@ interface AuthProviderProps {
 }
 
 function AuthProvider(props: AuthProviderProps) {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<UserData | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Call ME query when user is authenticated
+  const { data: meData, loading: meLoading, error: meError } = useGraphQLQuery(
+    ME_QUERY,
+    {
+      skip: !firebaseUser || isAuthenticating,
+      fetchPolicy: 'network-only',
+    }
+  );
 
   const triggerUnAuthenticate = useCallback(async () => {
     try {
@@ -91,9 +106,9 @@ function AuthProvider(props: AuthProviderProps) {
             photoURL: userData.photoURL,
             emailVerified: userData.emailVerified,
           };
-          setUser(userDataFormatted);
+          setFirebaseUser(userDataFormatted);
         } else {
-          setUser(null);
+          setFirebaseUser(null);
         }
         setIsAuthenticating(false);
       });
@@ -108,16 +123,90 @@ function AuthProvider(props: AuthProviderProps) {
     };
   }, []);
 
+  // Function to manually refresh Firebase token
+  const refreshFirebaseToken = useCallback(async (): Promise<string | null> => {
+    try {
+      const currentUser = firebaseInstance.fireBaseAuth.currentUser;
+      if (currentUser) {
+        const newToken = await currentUser.getIdToken(true);
+        console.log('Firebase ID token manually refreshed');
+        return newToken;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error manually refreshing Firebase ID token:', error);
+      return null;
+    }
+  }, []);
+
+  // Refresh Firebase ID token when ME query completes
+  useEffect(() => {
+    if (meData?.me && firebaseUser) {
+      // Refresh the Firebase ID token after getting user data
+      const refreshToken = async () => {
+        try {
+          const currentUser = firebaseInstance.fireBaseAuth.currentUser;
+          if (currentUser) {
+            // Force refresh the ID token
+            await currentUser.getIdToken(true);
+            console.log('Firebase ID token refreshed after ME query completion');
+          }
+        } catch (error: any) {
+          console.error('Error refreshing Firebase ID token:', error);
+          // If token refresh fails, it might indicate the user needs to re-authenticate
+          if (error.code === 'auth/user-token-expired') {
+            console.warn('User token expired, may need to re-authenticate');
+          }
+        }
+      };
+
+      refreshToken();
+    }
+  }, [meData?.me, firebaseUser]);
+
+  // Memoize combined user data
+  const user = useMemo((): CombinedUser | UserData | null => {
+    const backendUser = meData?.me
+    if (backendUser && firebaseUser) {
+      // Combine Firebase and backend user data
+      return {
+        // Firebase user data
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+        emailVerified: firebaseUser.emailVerified,
+        // Backend user data (overrides Firebase where applicable)
+        id: backendUser.id,
+        firebaseId: backendUser.firebaseId,
+        name: backendUser.name || firebaseUser.displayName,
+        phoneNumber: backendUser.phoneNumber,
+        phoneVerified: backendUser.phoneVerified,
+        role: backendUser.role,
+        createdAt: backendUser.createdAt,
+      };
+    }
+    return backendUser || firebaseUser;
+  }, [meData?.me, firebaseUser]);
+
+  // Memoize error state
+  const combinedError = useMemo(() => {
+    return error || meError?.message || null;
+  }, [error, meError]);
+
   const value = useMemo<AuthContextType>(
     () => ({
+      firebaseUser,
       user,
-      isAuthenticated: !!user,
+      isAuthenticated: !!firebaseUser,
       isAuthenticating,
+      isLoadingUser: meLoading,
       triggerUnAuthenticate,
       triggerGoogleLogin,
-      error,
+      refreshFirebaseToken,
+      error: combinedError,
     }),
-    [user, isAuthenticating, triggerUnAuthenticate, triggerGoogleLogin, error]
+    [firebaseUser, user, isAuthenticating, meLoading, triggerUnAuthenticate, triggerGoogleLogin, refreshFirebaseToken, combinedError]
   );
 
   return <AuthContext.Provider value={value}>{props.children}</AuthContext.Provider>;
