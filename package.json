@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t jatayat-web .",
+    "docker:run": "docker run -p 80:80 jatayat-web"
   },
   "dependencies": {
     "@apollo/client": "^3.8.0",
